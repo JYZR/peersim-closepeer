@@ -96,7 +96,7 @@ public class ClosePeerProtocol implements CDProtocol {
 		mergePeers(node, receivedClosePeers);
 		
 		// Update coordinate for the other peer
-		VivaldiProtocol otherVivaldiProt = (VivaldiProtocol) node.getProtocol(vivaldiProtID);
+		VivaldiProtocol otherVivaldiProt = (VivaldiProtocol) peer.node.getProtocol(vivaldiProtID);
 		peer.coord.update(otherVivaldiProt.getCoord());
 	}
 
