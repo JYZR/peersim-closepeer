@@ -72,6 +72,7 @@ public class ClosePeerProtocol implements CDProtocol {
 
 	@Override
 	public void nextCycle(Node node, int protocolID) {
+
 		// Set coordinate in the first cycle
 		int vivaldiProtID = Configuration.getPid(prefix + "." + PAR_VIVALDI_PROT);
 		if (coord == null) {
@@ -94,7 +95,7 @@ public class ClosePeerProtocol implements CDProtocol {
 				.getProtocol(protocolID);
 		List<NodeWrapper> receivedClosePeers = otherClosePeerProt.findClosePeers(coord);
 		mergePeers(node, receivedClosePeers);
-		
+
 		// Update coordinate for the other peer
 		VivaldiProtocol otherVivaldiProt = (VivaldiProtocol) peer.node.getProtocol(vivaldiProtID);
 		peer.coord.update(otherVivaldiProt.getCoord());
@@ -151,6 +152,10 @@ public class ClosePeerProtocol implements CDProtocol {
 		}
 		cpp.peers = new ArrayList<NodeWrapper>();
 		return cpp;
+	}
+
+	public List<NodeWrapper> getPeers() {
+		return peers;
 	}
 
 	class DistanceComparator implements Comparator<NodeWrapper> {
