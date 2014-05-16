@@ -3,7 +3,7 @@ from matplotlib import animation
 import numpy
 
 cycles = 1000
-scale = 1
+scale = 100
 
 def coordinates_filename(i):
     return './vivaldi-tmp/coordinates' + `i` + '.csv'
