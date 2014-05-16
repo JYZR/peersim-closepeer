@@ -99,6 +99,8 @@ public class ClosePeerProtocol implements CDProtocol {
 		// Update coordinate for the other peer
 		VivaldiProtocol otherVivaldiProt = (VivaldiProtocol) peer.node.getProtocol(vivaldiProtID);
 		peer.coord.update(otherVivaldiProt.getCoord());
+		peer.distance = coord.distance(peer.coord);
+		peer.recommendable = true;
 	}
 
 	/**
@@ -113,7 +115,7 @@ public class ClosePeerProtocol implements CDProtocol {
 		for (int i = 0; i < peers.size(); i++) {
 			NodeWrapper p = peers.get(i);
 			double distance = otherCoord.distance(p.coord);
-			if (distance < nbDistance) {
+			if (distance < nbDistance && p.recommendable) {
 				NodeWrapper copy = p.closePeerCopy();
 				copy.distance = distance;
 				closePeers.add(copy);
@@ -163,5 +165,12 @@ public class ClosePeerProtocol implements CDProtocol {
 		public int compare(NodeWrapper cp1, NodeWrapper cp2) {
 			return (int) Math.ceil(cp1.distance - cp2.distance);
 		}
+	}
+
+	public boolean isNb(Node n) {
+		for (NodeWrapper nw : peers)
+			if (nw.node == n)
+				return true;
+		return false;
 	}
 }
