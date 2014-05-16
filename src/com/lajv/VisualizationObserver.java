@@ -20,11 +20,25 @@ public class VisualizationObserver implements Control {
 	// ====================================================================
 
 	/**
-	 * The protocol to operate on.
+	 * The vivaldi protocol to operate on.
 	 * 
 	 * @config
 	 */
-	private static final String PAR_PROT = "protocol";
+	private static final String PAR_VIVALDI_PROT = "vivaldi_protocol";
+
+	/**
+	 * The close peer protocol to operate on.
+	 * 
+	 * @config
+	 */
+	private static final String PAR_CLOSE_PEER_PROT = "closepeer_protocol";
+
+	/**
+	 * The node which will be choosen as the center. It has to be one of the initial nodes.
+	 * 
+	 * @config
+	 */
+	private static final String PAR_CENTER_NODE = "center_node";
 
 	/**
 	 * Config parameter that determines the threshold for when the Vivaldi algorithm should stop the
@@ -64,9 +78,14 @@ public class VisualizationObserver implements Control {
 	private final String name;
 
 	/**
-	 * Protocol identifier; obtained from config property {@link #PAR_PROT}.
+	 * Protocol identifier; obtained from config property {@link #PAR_VIVALDI_PROT}.
 	 * */
-	private final int pid;
+	private final int vivPid;
+
+	/**
+	 * Protocol identifier; obtained from config property {@link #PAR_CLOSE_PEER_PROT}.
+	 * */
+	private final int cpPid;
 
 	/**
 	 * Threshold for when to stop the execution; obtained from config property
@@ -79,19 +98,22 @@ public class VisualizationObserver implements Control {
 	private int iterations;
 	private String coords_file_prefix;
 	private String meta_file_prefix;
+	private int centerNodeID;
 
 	// ==================== Constructor ===================================
 	// ====================================================================
 
 	public VisualizationObserver(String name) {
 		this.name = name;
-		pid = Configuration.getPid(name + "." + PAR_PROT);
+		vivPid = Configuration.getPid(name + "." + PAR_VIVALDI_PROT);
+		cpPid = Configuration.getPid(name + "." + PAR_CLOSE_PEER_PROT);
 		threshold = Configuration.getDouble(name + "." + PAR_THRESHOLD, -1);
 		inital_sum = final_sum = iterations = 0;
 		coords_file_prefix = Configuration.getString(name + "." + PAR_COORDS_FILE_PREFIX,
 				coords_file_prefix_default);
 		meta_file_prefix = Configuration.getString(name + "." + PAR_META_FILE_PREFIX,
 				meta_file_prefix_default);
+		centerNodeID = Configuration.getInt(name + "." + PAR_CENTER_NODE);
 	}
 
 	// ====================== Methods =====================================
@@ -120,15 +142,15 @@ public class VisualizationObserver implements Control {
 			FileOutputStream fos = new FileOutputStream(coords_filename);
 			PrintStream ps = new PrintStream(fos);
 
+			// Sort network and get center node
 			Network.sort(null);
-			NetworkNode me = (NetworkNode) Network.get(1);
+			NetworkNode me = (NetworkNode) Network.get(centerNodeID);
 			double meColor = 0, nbColor = 0.5, otherColor = 1, color;
-			int cpPid = Configuration.getPid(name + ".cp");
 			ClosePeerProtocol cpp = (ClosePeerProtocol) me.getProtocol(cpPid);
 
 			for (int i = 0; i < Network.size(); i++) {
 				NetworkNode n1 = (NetworkNode) Network.get(i);
-				VivaldiProtocol vp1 = (VivaldiProtocol) n1.getProtocol(pid);
+				VivaldiProtocol vp1 = (VivaldiProtocol) n1.getProtocol(vivPid);
 
 				if (n1 == me)
 					color = meColor;
@@ -141,7 +163,7 @@ public class VisualizationObserver implements Control {
 																// n1.location).isp);
 				for (int j = i + 1; j < Network.size(); j++) {
 					NetworkNode n2 = (NetworkNode) Network.get(j);
-					VivaldiProtocol vp2 = (VivaldiProtocol) n2.getProtocol(pid);
+					VivaldiProtocol vp2 = (VivaldiProtocol) n2.getProtocol(vivPid);
 					double latency = n1.location.latency(n2.location);
 					double estLatency = vp1.vivCoord.distance(vp2.vivCoord);
 					double error = Math.abs(latency - estLatency);
