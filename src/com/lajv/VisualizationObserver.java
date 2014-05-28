@@ -1,13 +1,15 @@
 package com.lajv;
 
+import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintStream;
 
 import com.lajv.NetworkNode;
 import com.lajv.closepeer.ClosePeerProtocol;
-import com.lajv.location.IspLocation;
 import com.lajv.vivaldi.VivaldiProtocol;
 
 import peersim.config.Configuration;
@@ -61,13 +63,12 @@ public class VisualizationObserver implements Control {
 
 	/**
 	 * Config parameter which defines the prefix for where the meta data is saved. Include a slash
-	 * (/) for saving the files in a sub-directory. Default prefix is
-	 * {@value #meta_file_prefix_default}.
+	 * (/) for saving the files in a sub-directory. Default prefix is {@value #meta_file_default}.
 	 * 
 	 * @config
 	 */
-	private static final String PAR_META_FILE_PREFIX = "meta_file_prefix";
-	private static final String meta_file_prefix_default = "./vivaldi-tmp/meta";
+	private static final String PAR_META_FILE = "meta_file_prefix";
+	private static final String meta_file_default = "./vivaldi-tmp/meta.csv";
 
 	// =========================== Fields =================================
 	// ====================================================================
@@ -97,8 +98,9 @@ public class VisualizationObserver implements Control {
 	private double inital_sum, final_sum;
 	private int iterations;
 	private String coords_file_prefix;
-	private String meta_file_prefix;
+	private String meta_file;
 	private int centerNodeID;
+	private double avg_distance = 0;
 
 	// ==================== Constructor ===================================
 	// ====================================================================
@@ -111,9 +113,18 @@ public class VisualizationObserver implements Control {
 		inital_sum = final_sum = iterations = 0;
 		coords_file_prefix = Configuration.getString(name + "." + PAR_COORDS_FILE_PREFIX,
 				coords_file_prefix_default);
-		meta_file_prefix = Configuration.getString(name + "." + PAR_META_FILE_PREFIX,
-				meta_file_prefix_default);
+		meta_file = Configuration.getString(name + "." + PAR_META_FILE, meta_file_default);
 		centerNodeID = Configuration.getInt(name + "." + PAR_CENTER_NODE);
+
+		// PrintStream ps;
+		// try {
+		// ps = new PrintStream(new FileOutputStream(meta_file));
+		// ps.println("iteration, cycle, sum_errors, avg_err, avg_uncertainty, avg_uncertainty_balance, avg_move_distance");
+		// ps.close();
+		// } catch (FileNotFoundException e) {
+		// e.printStackTrace();
+		// }
+
 	}
 
 	// ====================== Methods =====================================
@@ -133,6 +144,7 @@ public class VisualizationObserver implements Control {
 		double maxError = 0;
 		double sum = 0;
 		double avg_err = 0;
+		double avg_norm_error = 0;
 		double avg_uncertainty = 0;
 		double avg_uncertainty_balance = 0;
 		double avg_move_distance = 0;
@@ -181,21 +193,25 @@ public class VisualizationObserver implements Control {
 				n += i;
 			}
 			avg_err /= n;
+			if (avg_distance == 0)
+				avg_distance = avg_err;
+			avg_norm_error = avg_err / avg_distance;
 			avg_uncertainty /= Network.size();
 			avg_uncertainty_balance /= Network.size();
 			avg_move_distance /= Network.size();
 			fos.close();
 
 			// Write meta data
-			String meta_filename = meta_file_prefix + iterations + ".csv";
-			fos = new FileOutputStream(meta_filename);
-			ps = new PrintStream(fos);
-			ps.println("sum:" + sum);
-			ps.println("avg_err:" + avg_err);
-			ps.println("avg_uncertainty:" + avg_uncertainty);
-			ps.println("avg_uncertainty_balance:" + avg_uncertainty_balance);
-			ps.println("avg_move_distance:" + avg_move_distance);
-			fos.close();
+			BufferedWriter bw = new BufferedWriter(new FileWriter(new File(meta_file), true));
+			bw.append("0, ");
+			bw.append(iterations + ", ");
+			bw.append(sum + ", ");
+			bw.append(avg_err + ", ");
+			bw.append(avg_norm_error + ", ");
+			bw.append(avg_uncertainty + ", ");
+			bw.append(avg_uncertainty_balance + ", ");
+			bw.append(avg_move_distance + "\n");
+			bw.close();
 
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
