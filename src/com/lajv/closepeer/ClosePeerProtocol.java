@@ -110,6 +110,9 @@ public class ClosePeerProtocol implements CDProtocol {
 	 *         node itself
 	 */
 	private List<NodeWrapper> findClosePeers(VivaldiCoordinate otherCoord) {
+		if (coord == null) {
+			return new LinkedList<NodeWrapper>();
+		}
 		double nbDistance = otherCoord.distance(coord);
 		List<NodeWrapper> closePeers = new LinkedList<NodeWrapper>();
 		for (int i = 0; i < peers.size(); i++) {
