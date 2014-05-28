@@ -3,7 +3,7 @@ from matplotlib import animation
 import numpy
 
 cycles = 1000
-scale = 100
+scale = 1
 
 def coordinates_filename(i):
     return './vivaldi-tmp/coordinates' + `i` + '.csv'
@@ -40,24 +40,24 @@ def animate(i):
         if (x < 0.0 + 0.1):
             return [1, 0, 0] # Red
         if (x < 0.5 + 0.1):
-            return [0, 1, 0] # Green
+            return [0, 0, 0.8] # Dark blue
         if (x < 1.0 + 0.1):
-            return [0.8, 0.8, 0.8] # Gray
+            return [1, 1, 1] # White
 
     colors = map(float_to_color, cs)
     sc.set_facecolors(colors)
 
     text_cycle.set_text("Cycle: " + `i`)
-    file = open ( meta_filename(i) , 'r' )
-    meta = [ line.split(':') for line in file ]
-    text_sum.set_text("Sum of errors: " + `float(meta[0][1])`)
-    text_avg_err.set_text("Average error: " + `float(meta[1][1])`)
-    text_avg_uncertainty.set_text("Average uncertainty: " + `float(meta[2][1])`)
-    text_avg_uncertainty_balance.set_text("Average uncertainty balance: " + `float(meta[3][1])`)
-    text_avg_move_distance.set_text("Average move distance: " + `float(meta[4][1])`)
-    file.close()
+    # file = open ( meta_filename(i) , 'r' )
+    # meta = [ line.split(':') for line in file ]
+    # text_sum.set_text("Sum of errors: " + `float(meta[0][1])`)
+    # text_avg_err.set_text("Average error: " + `float(meta[1][1])`)
+    # text_avg_uncertainty.set_text("Average uncertainty: " + `float(meta[2][1])`)
+    # text_avg_uncertainty_balance.set_text("Average uncertainty balance: " + `float(meta[3][1])`)
+    # text_avg_move_distance.set_text("Average move distance: " + `float(meta[4][1])`)
+    # file.close()
 
-anim = animation.FuncAnimation(fig, animate, xrange(cycles), init_func=init, interval=100, repeat=False)
+anim = animation.FuncAnimation(fig, animate, xrange(cycles), init_func=init, interval=10, repeat=False)
 
 pyplot.show()
 
