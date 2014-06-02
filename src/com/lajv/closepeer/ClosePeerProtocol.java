@@ -166,7 +166,12 @@ public class ClosePeerProtocol implements CDProtocol {
 	class DistanceComparator implements Comparator<NodeWrapper> {
 		@Override
 		public int compare(NodeWrapper cp1, NodeWrapper cp2) {
-			return (int) Math.ceil(cp1.distance - cp2.distance);
+			if (cp1.distance > cp2.distance)
+				return 1;
+			else if (cp1.distance < cp2.distance)
+				return -1;
+			else
+				return 0;
 		}
 	}
 
@@ -175,5 +180,30 @@ public class ClosePeerProtocol implements CDProtocol {
 			if (nw.node == n)
 				return true;
 		return false;
+	}
+
+	public double nbSimilarity(Node me, int pid) {
+		double sumPairSimilarity = 0.0;
+
+		// Check for all neighbours
+		for (NodeWrapper nb : peers) {
+			int similarNodes = 0;
+			List<NodeWrapper> nbPeers = ((ClosePeerProtocol) nb.node.getProtocol(pid)).getPeers();
+			// Check every possible pairwise similarity
+			for (NodeWrapper myNb : peers) {
+				for (NodeWrapper nbNb : nbPeers) {
+					if (nbNb.node == myNb.node || nbNb.node == me) {
+						similarNodes++;
+						break;
+					}
+				}
+			}
+			double pairSimilarity = (double) similarNodes / peers.size();
+			sumPairSimilarity += pairSimilarity;
+		}
+		double similarity = 0;
+		if (peers.size() != 0)
+			similarity = (double) (sumPairSimilarity / peers.size());
+		return similarity;
 	}
 }
